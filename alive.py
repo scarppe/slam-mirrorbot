@@ -5,7 +5,13 @@
 import time
 import requests
 import os
+import logging
+import pytz
+import datetime
 
+LOGGER = logging.getLogger(__name__)
+IST = pytz.timezone('Asia/Kolkata')
+PING_INTERVAL = int(os.environ.get('PING_INTERVAL')) * 60
 BASE_URL = os.environ.get('BASE_URL_OF_BOT', None)
 try:
     if len(BASE_URL) == 0:
@@ -15,5 +21,6 @@ except:
 PORT = os.environ.get('PORT', None)
 if PORT is not None and BASE_URL is not None:
     while True:
-        time.sleep(1440)
+        time.sleep(PING_INTERVAL)
         status = requests.get(BASE_URL).status_code
+        LOGGER.info(f"{datetime.datetime.now(IST).strftime('%Y-%m-%d %H:%M:%S')}: {BASE_URL} Status: {status}")
