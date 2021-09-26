@@ -2,7 +2,10 @@ import shutil, psutil
 import signal
 import os
 import asyncio
-
+import pytz
+import datetime
+import time
+import requests
 from pyrogram import idle
 from sys import executable
 
@@ -10,7 +13,7 @@ from telegram import ParseMode
 from telegram.ext import CommandHandler
 from telegraph import Telegraph
 from wserver import start_server_async
-from bot import bot, app, dispatcher, updater, botStartTime, IGNORE_PENDING_REQUESTS, IS_VPS, PORT, alive, web, OWNER_ID, AUTHORIZED_CHATS, telegraph_token
+from bot import bot, app, dispatcher, updater, botStartTime, IGNORE_PENDING_REQUESTS, IS_VPS, PORT, web, OWNER_ID, AUTHORIZED_CHATS, telegraph_token
 from bot.helper.ext_utils import fs_utils
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.message_utils import *
@@ -70,7 +73,7 @@ def restart(update, context):
         f.truncate(0)
         f.write(f"{restart_message.chat.id}\n{restart_message.message_id}\n")
     fs_utils.clean_all()
-    alive.terminate()
+    #alive.terminate()
     web.terminate()
     os.execl(executable, executable, "-m", "bot")
 
@@ -221,6 +224,26 @@ botcmds = [
     ]
 '''
 
+def alive():
+    global BASE_URL, PING_INTERVAL
+    IST = pytz.timezone('Asia/Kolkata')
+    PORT = os.environ.get('PORT', None)
+    try:
+        PING_INTERVAL = int(os.environ.get('PING_INTERVAL')) * 60
+        BASE_URL = os.environ.get('BASE_URL_OF_BOT', None)
+        if len(BASE_URL) == 0:
+            BASE_URL = None
+    except KeyError as e:
+        LOGGER.error(e)
+        BASE_URL = None
+        PING_INTERVAL = 24 * 60
+    finally:
+        if PORT is not None and BASE_URL is not None:
+            while True:
+                time.sleep(PING_INTERVAL)
+                status = requests.get(BASE_URL).status_code
+                LOGGER.info(f"{datetime.datetime.now(IST).strftime('%Y-%m-%d %H:%M:%S')}: {BASE_URL} Status: {status}")
+
 def main():
     fs_utils.start_cleanup()
     if IS_VPS:
@@ -260,6 +283,7 @@ def main():
     updater.start_polling(drop_pending_updates=IGNORE_PENDING_REQUESTS)
     LOGGER.info("Bot Started!")
     signal.signal(signal.SIGINT, fs_utils.exit_clean_up)
+    alive()
 
 app.start()
 main()
