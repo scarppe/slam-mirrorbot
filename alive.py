@@ -6,14 +6,17 @@ import time
 import requests
 import os
 
+global PING_INTERVAL
 BASE_URL = os.environ.get('BASE_URL_OF_BOT', None)
 try:
     if len(BASE_URL) == 0:
         BASE_URL = None
+    PING_INTERVAL = int(os.environ.get('PING_INTERVAL')) * 60
 except:
     BASE_URL = None
+    PING_INTERVAL = 600
 PORT = os.environ.get('PORT', None)
 if PORT is not None and BASE_URL is not None:
     while True:
-        time.sleep(600)
+        time.sleep(PING_INTERVAL)
         status = requests.get(BASE_URL).status_code
