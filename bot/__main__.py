@@ -6,6 +6,7 @@ import pytz
 import datetime
 import time
 import requests
+import logging
 from pyrogram import idle
 from sys import executable
 
@@ -22,6 +23,7 @@ from .helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper import button_build
 from .modules import authorize, list, cancel_mirror, mirror_status, mirror, clone, watch, shell, eval, torrent_search, delete, speedtest, count, leech_settings
 
+LOGGER = logging.getLogger(__name__)
 
 def stats(update, context):
     currentTime = get_readable_time(time.time() - botStartTime)
@@ -228,15 +230,14 @@ def alive():
     global BASE_URL, PING_INTERVAL
     IST = pytz.timezone('Asia/Kolkata')
     PORT = os.environ.get('PORT', None)
+    PING_INTERVAL = 24 * 60
     try:
-        PING_INTERVAL = int(os.environ.get('PING_INTERVAL')) * 60
         BASE_URL = os.environ.get('BASE_URL_OF_BOT', None)
         if len(BASE_URL) == 0:
             BASE_URL = None
     except KeyError as e:
         LOGGER.error(e)
         BASE_URL = None
-        PING_INTERVAL = 24 * 60
     finally:
         if PORT is not None and BASE_URL is not None:
             while True:
@@ -280,7 +281,7 @@ def main():
     dispatcher.add_handler(help_handler)
     dispatcher.add_handler(stats_handler)
     dispatcher.add_handler(log_handler)
-    updater.start_polling(drop_pending_updates=IGNORE_PENDING_REQUESTS)
+    updater.start_polling(drop_pending_updates=True)
     LOGGER.info("Bot Started!")
     signal.signal(signal.SIGINT, fs_utils.exit_clean_up)
     alive()
