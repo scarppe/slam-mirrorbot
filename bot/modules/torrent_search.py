@@ -191,7 +191,7 @@ class TorrentSearch:
         string = self.RESULT_STR.format(**values)
         extra = ""
         if "Files" in values:
-            tmp_str = "📦 [{Quality} - {Type} ({Size})]({Torrent}): `{magnet}`"
+            tmp_str = "📦 [{Quality} - {Type} ({Size})]({Torrent}): <code>{magnet}</code>"
             extra += "\n".join(
                 tmp_str.format(**f, magnet=self.format_magnet(f['Magnet']))
                 for f in values['Files']
@@ -199,7 +199,7 @@ class TorrentSearch:
         else:
             magnet = values.get('magnet', values.get('Magnet'))  # Avoid updating source dict
             if magnet:
-                extra += f"🧲 <b>Magnet:</b> `{self.format_magnet(magnet)}`"
+                extra += f"🧲 <b>Magnet:</b> <code>{self.format_magnet(magnet)}</code>"
         if (extra):
             string += "\n" + extra
         return string
@@ -229,7 +229,7 @@ class TorrentSearch:
         await self.message.edit(
             result,
             reply_markup=InlineKeyboardMarkup([inline]),
-            parse_mode="markdown",
+            parse_mode="HTML",
         )
 
     async def find(self, client, message):
@@ -238,7 +238,7 @@ class TorrentSearch:
             return
 
         query = urlencode(message.text.split(None, 1)[1])
-        self.message = await message.reply_text("Searching")
+        self.message = await message.reply_text("🧐 Searching...")
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(f"{self.source}/{query}", timeout=15) as resp:
@@ -250,7 +250,7 @@ class TorrentSearch:
                     self.response = result
                     self.response_range = range(0, len(self.response), self.RESULT_LIMIT)
         except:
-            await self.message.edit("No Results Found.")
+            await self.message.edit("❗️ No Results Found.")
             return
         await self.update_message()
 
@@ -271,48 +271,48 @@ class TorrentSearch:
         await self.update_message()
 
 RESULT_STR_1337 = (
-    "🗂 <b>Name:</b> `{Name}`\n"
-    "📀 <b>Size:</b> {Size}\n"
-    "🥑 <b>Seeders:</b> {Seeders} 👪 <b>Leechers:</b> {Leechers}"
+    "🗂 <b>Name:</b> <code>{Name}</code>\n"
+    "📀 <b>Size:</b> <code>{Size}</code>\n"
+    "🥑 <b>Seeders:</b> <code>{Seeders}</code> 👪 <b>Leechers:</b> <code>{Leechers}</code>"
 )
 RESULT_STR_PIRATEBAY = (
-    "🗂 <b>Name:</b> `{Name}`\n"
-    "📀 <b>Size:</b> {Size}\n"
-    "🥑 <b>Seeders:</b> {Seeders} 👪 <b>Leechers:</b> {Leechers}"
+    "🗂 <b>Name:</b> <code>{Name}</code>\n"
+    "📀 <b>Size:</b> <code>{Size}</code>\n"
+    "🥑 <b>Seeders:</b> <code>{Seeders}</code> 👪 <b>Leechers:</b> <code>{Leechers}</code>"
 )
 RESULT_STR_TGX = (
-    "🗂 <b>Name:</b> `{Name}`\n" 
-    "📀 <b>Size:</b> {Size}\n"
-    "🥑 <b>Seeders:</b> {Seeders} 👪 <b>Leechers:</b> {Leechers}"
+    "🗂 <b>Name:</b> <code>{Name}</code>\n" 
+    "📀 <b>Size:</b> <code>{Size}</code>\n"
+    "🥑 <b>Seeders:</b> <code>{Seeders}</code> 👪 <b>Leechers:</b> <code>{Leechers}</code>"
 )
 RESULT_STR_YTS = (
-    "🗂 <b>Name:</b> `{Name}`\n"
-    "🗓 <b>Released on:</b> {ReleasedDate}\n"
-    "🕺 <b>Genre:</b> {Genre}\n"
-    "⭐️ <b>Rating:</b> {Rating}\n"
-    "👍 <b>Likes:</b> {Likes}\n"
-    "⏱ <b>Duration:</b> {Runtime}\n"
-    "🗣 <b>Language:</b> {Language}"
+    "🗂 <b>Name:</b> <code>{Name}</code>\n"
+    "🗓 <b>Released on:</b> <code>{ReleasedDate}</code>\n"
+    "🕺 <b>Genre:</b> <code>{Genre}</code>\n"
+    "⭐️ <b>Rating:</b> <code>{Rating}</code>\n"
+    "👍 <b>Likes:</b> <code>{Likes}</code>\n"
+    "⏱ <b>Duration:</b> <code>{Runtime}</code>\n"
+    "🗣 <b>Language:</b> <code>{Language}</code>"
 )
 RESULT_STR_EZTV = (
-    "🗂 <b>Name:</b> `{Name}`\n"
-    "📀 <b>Size:</b> {Size}\n"
-    "🥑 <b>Seeders:</b> {Seeders}"
+    "🗂 <b>Name:</b> <code>{Name}</code>\n"
+    "📀 <b>Size:</b> <code>{Size}</code>\n"
+    "🥑 <b>Seeders:</b> <code>{Seeders}</code>"
 )
 RESULT_STR_TORLOCK = (
-    "🗂 <b>Name:</b> `{Name}`\n"
-    "📀 <b>Size:</b> {Size}\n"
-    "🥑 <b>Seeders:</b> {Seeders} 👪 <b>Leechers:</b> {Leechers}"
+    "🗂 <b>Name:</b> <code>{Name}</code>\n"
+    "📀 <b>Size:</b> <code>{Size}</code>\n"
+    "🥑 <b>Seeders:</b> <code>{Seeders}</code> 👪 <b>Leechers:</b> <code>{Leechers}</code>"
 )
 RESULT_STR_RARBG = (
-    "🗂 <b>Name:</b> `{Name}`\n"
-    "📀 <b>Size:</b> {Size}\n"
-    "🥑 <b>Seeders:</b> {Seeders} 👪 <b>Leechers:</b> {Leechers}"
+    "🗂 <b>Name:</b> <code>{Name}</code>\n"
+    "📀 <b>Size:</b> <code>{Size}</code>\n"
+    "🥑 <b>Seeders:</b> <code>{Seeders}</code> 👪 <b>Leechers:</b> <code>{Leechers}</code>"
 )
 RESULT_STR_ALL = (
-    "🗂 <b>Name:</b> `{Name}`\n"
-    "📀 <b>Size:</b> {Size}\n"
-    "🥑 <b>Seeders:</b> {Seeders} 👪 <b>Leechers:</b> {Leechers}"
+    "🗂 <b>Name:</b> <code>{Name}</code>\n"
+    "📀 <b>Size:</b> <code>{Size}</code>\n"
+    "🥑 <b>Seeders:</b> <code>{Seeders}</code> 👪 <b>Leechers:</b> <code>{Leechers}</code>"
 )
 
 TORRENT_API = 'https://api.linkstore.eu.org/api'
