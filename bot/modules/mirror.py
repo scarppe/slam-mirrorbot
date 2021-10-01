@@ -192,7 +192,7 @@ class MirrorListener(listeners.MirrorListeners):
             uname = f"@{self.message.from_user.username}"
         else:
             uname = f'<a href="tg://user?id={self.message.from_user.id}">{self.message.from_user.first_name}</a>'
-        msg = f"{uname} your download has been stopped due to: {error}"
+        msg = f"{uname} <b>Your download has been stopped due to: <code>{error}</code></b> ❌"
         sendMessage(msg, self.bot, self.update)
         if count == 0:
             self.clean()
@@ -213,13 +213,13 @@ class MirrorListener(listeners.MirrorListeners):
                 uname = f'<a href="tg://user?id={self.message.from_user.id}">{self.message.from_user.first_name}</a>'
             count = len(files)
             if self.message.chat.type == 'private':
-                msg = f'<b>Name:</b> <code>{link}</code>\n'
-                msg += f'<b>Total Files:</b> {count}'
+                msg = f'🗂 <b>Name:</b> <code>{link}</code>\n'
+                msg += f'📀 <b>Total Files:</b> {count}'
                 sendMessage(msg, self.bot, self.update)
             else:
                 chat_id = str(self.message.chat.id)[4:]
-                msg = f"<b>Name:</b> <a href='https://t.me/c/{chat_id}/{self.uid}'>{link}</a>\n"
-                msg += f'<b>Total Files:</b> {count}\n'
+                msg = f"🗂 <b>Name:</b> <a href='https://t.me/c/{chat_id}/{self.uid}'>{link}</a>\n"
+                msg += f'📀 <b>Total Files:</b> {count}\n'
                 msg += f'cc: {uname}\n\n'
                 fmsg = ''
                 for index, item in enumerate(list(files), start=1):
@@ -319,7 +319,7 @@ class MirrorListener(listeners.MirrorListeners):
             uname = f'<a href="tg://user?id={self.message.from_user.id}">{self.message.from_user.first_name}</a>'
         if uname is not None:
             men = f'{uname} '
-        sendMessage(men + e_str, self.bot, self.update)
+        sendMessage(men + '<b>' + e_str + '</b> 🚫', self.bot, self.update)
         if count == 0:
             self.clean()
         else:
@@ -404,7 +404,7 @@ def _mirror(bot, update, isTar=False, extract=False, isZip=False, isQbit=False, 
             return
 
     elif not bot_utils.is_url(link) and not bot_utils.is_magnet(link):
-        sendMessage('No download source provided', bot, update)
+        sendMessage('<b>🤬 No download source provided!</b>', bot, update)
         return
     elif not os.path.exists(link) and not bot_utils.is_mega_link(link) and not bot_utils.is_gdrive_link(link) and not bot_utils.is_magnet(link):
         try:

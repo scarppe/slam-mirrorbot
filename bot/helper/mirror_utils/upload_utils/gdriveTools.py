@@ -11,7 +11,6 @@ import logging
 import time
 from random import randrange
 
-import telegraph
 from google.auth.transport.requests import Request
 from google.oauth2 import service_account
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -24,7 +23,9 @@ from telegram import InlineKeyboardMarkup
 from bot.helper.telegram_helper import button_build
 from telegraph import Telegraph
 from bot import parent_id, DOWNLOAD_DIR, IS_TEAM_DRIVE, INDEX_URL, \
-    USE_SERVICE_ACCOUNTS, telegraph_token, BUTTON_FOUR_NAME, BUTTON_FOUR_URL, BUTTON_FIVE_NAME, BUTTON_FIVE_URL, BUTTON_SIX_NAME, BUTTON_SIX_URL, SHORTENER, SHORTENER_API, VIEW_LINK, DRIVES_NAMES, DRIVES_IDS, INDEX_URLS, RECURSIVE_SEARCH
+    USE_SERVICE_ACCOUNTS, telegraph_token, BUTTON_FOUR_NAME, BUTTON_FOUR_URL, BUTTON_FIVE_NAME, BUTTON_FIVE_URL, \
+    BUTTON_SIX_NAME, BUTTON_SIX_URL, SHORTENER, SHORTENER_API, VIEW_LINK, DRIVES_NAMES, DRIVES_IDS, INDEX_URLS, \
+    RECURSIVE_SEARCH, telegraph
 from bot.helper.ext_utils.bot_utils import get_readable_file_size, setInterval
 from bot.helper.ext_utils.fs_utils import get_mime_type, get_path_size
 from bot.helper.ext_utils.shortenurl import short_url
@@ -426,7 +427,7 @@ class GoogleDriveHelper:
                         buttons.buildbutton("⚡ Index Link", url)
             else:
                 file = self.copyFile(meta.get('id'), parent_id)
-                msg += f'<b>Filename: </b><code>{file.get("name")}</code>'
+                msg += f'🗂 <b>Filename: </b><code>{file.get("name")}</code>'
                 durl = self.__G_DRIVE_BASE_DOWNLOAD_URL.format(file.get("id"))
                 buttons = button_build.ButtonMaker()
                 if SHORTENER is not None and SHORTENER_API is not None:
@@ -439,8 +440,8 @@ class GoogleDriveHelper:
                 except:
                     typ = 'File'
                 try:
-                    msg += f'\n<b>Size: </b><code>{get_readable_file_size(int(meta.get("size")))}</code>'
-                    msg += f'\n<b>Type: </b><code>{typ}</code>'
+                    msg += f'\n📀 <b>Size: </b><code>{get_readable_file_size(int(meta.get("size")))}</code>'
+                    msg += f'\n🗳 <b>Type: </b><code>{typ}</code>'
                 except TypeError:
                     pass
                 if INDEX_URL is not None:
@@ -814,10 +815,10 @@ class GoogleDriveHelper:
                                                     author_url='https://github.com/SlamDevs/slam-mirrorbot',
                                                     html_content=content
                                                     )['path'])
-        except telegraph.TelegraphException as err:
-            LOGGER.error("Failed to create telegraph page: ".format(err))
+        except telegraph.TelegraphException:
+            LOGGER.error("Failed to create telegraph page")
             return "telegraphException", None
-        finally:
+        else:
             self.num_of_path = len(self.path)
             if self.num_of_path > 1:
                 self.edit_telegraph()
@@ -850,7 +851,7 @@ class GoogleDriveHelper:
                 msg += f'\n📂 <b>SubFolders: </b><code>{self.total_folders}</code>'
                 msg += f'\n📚 <b>Files: </b><code>{self.total_files}</code>'
             else:
-                msg += f'<b>Filename: </b><code>{name}</code>'
+                msg += f'🗂 <b>Filename: </b><code>{name}</code>'
                 try:
                     typee = drive_file['mimeType']
                 except:
@@ -858,9 +859,9 @@ class GoogleDriveHelper:
                 try:
                     self.total_files += 1
                     self.gDrive_file(**drive_file)
-                    msg += f'\n<b>Size: </b><code>{get_readable_file_size(self.total_bytes)}</code>'
-                    msg += f'\n<b>Type: </b><code>{typee}</code>'
-                    msg += f'\n<b>Files: </b><code>{self.total_files}</code>'
+                    msg += f'\n📀 <b>Size: </b><code>{get_readable_file_size(self.total_bytes)}</code>'
+                    msg += f'\n🗳 <b>Type: </b><code>{typee}</code>'
+                    msg += f'\n📚 <b>Files: </b><code>{self.total_files}</code>'
                 except TypeError:
                     pass
         except Exception as err:
@@ -1055,4 +1056,4 @@ class GoogleDriveHelper:
             LOGGER.info(f"Cancelling Clone: {self.name}")
         elif self.is_uploading:
             LOGGER.info(f"Cancelling Upload: {self.name}")
-            self.__listener.onUploadError('your upload has been stopped and uploaded data has been deleted!')
+            self.__listener.onUploadError('Your upload has been stopped and uploaded data has been deleted!')
