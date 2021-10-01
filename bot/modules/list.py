@@ -17,7 +17,7 @@ def list_drive(update, context):
         if button:
             editMessage(msg, reply, button)
         elif msg == "telegraphException":
-            editMessage(f'😵 <b>Failed to create page. Please refine your search query and retry.</b>', reply, button)
+            editMessage(f'😵 <b>Failed to search. Please refine your query and retry.</b>', reply, button)
         else:
             editMessage(f'🙅‍♂ <b>No result found for</b> <code>{search}</code>', reply, button)
     except IndexError:

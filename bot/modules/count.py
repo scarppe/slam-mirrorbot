@@ -26,7 +26,7 @@ def countNode(update, context):
             cc = f'\n\ncc: {uname}'
         sendMessage(result + cc, context.bot, update)
     else:
-        sendMessage("🤷‍♂ <b>Provide G-Drive Shareable Link to Count.<b>", context.bot, update)
+        sendMessage("🤷‍♂ <b>Provide G-Drive Shareable Link to Count.</b>", context.bot, update)
 
 count_handler = CommandHandler(BotCommands.CountCommand, countNode, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
 dispatcher.add_handler(count_handler)
