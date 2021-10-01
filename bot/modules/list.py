@@ -10,17 +10,19 @@ def list_drive(update, context):
     try:
         search = update.message.text.split(' ', maxsplit=1)[1]
         LOGGER.info(f"Searching: {search}")
-        reply = sendMessage('Searching..... Please wait!', context.bot, update)
+        reply = sendMessage('🧐 <b>Searching..... Please wait!</b>', context.bot, update)
         gdrive = GoogleDriveHelper()
         msg, button = gdrive.drive_list(search)
 
         if button:
             editMessage(msg, reply, button)
+        elif msg == "telegraphException":
+            editMessage(f'😵 <b>Failed to create page. Please retry or refine your search query.</b>', reply, button)
         else:
-            editMessage(f'No result found for <code>{search}</code>', reply, button)
+            editMessage(f'🙅‍♂ <b>No result found for:</b> <code>{search}</code>', reply, button)
 
     except IndexError:
-        sendMessage('Send a search key along with command', context.bot, update)
+        sendMessage('😡 <b>Send a search key along with the command</b>', context.bot, update)
 
 
 list_handler = CommandHandler(BotCommands.ListCommand, list_drive, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)

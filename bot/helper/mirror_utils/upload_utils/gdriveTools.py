@@ -11,6 +11,7 @@ import logging
 import time
 from random import randrange
 
+import telegraph
 from google.auth.transport.requests import Request
 from google.oauth2 import service_account
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -805,23 +806,27 @@ class GoogleDriveHelper:
         if len(self.telegraph_content) == 0:
             return "", None
 
-        for content in self.telegraph_content :
-            self.path.append(Telegraph(access_token=telegraph_token).create_page(
+        try:
+            for content in self.telegraph_content :
+                self.path.append(Telegraph(access_token=telegraph_token).create_page(
                                                     title = 'Slam Mirrorbot Search',
                                                     author_name='Slam Mirrorbot',
                                                     author_url='https://github.com/SlamDevs/slam-mirrorbot',
                                                     html_content=content
                                                     )['path'])
+        except telegraph.TelegraphException as err:
+            LOGGER.error("Failed to create telegraph page: ".format(err))
+            return "telegraphException", None
+        finally:
+            self.num_of_path = len(self.path)
+            if self.num_of_path > 1:
+                self.edit_telegraph()
 
-        self.num_of_path = len(self.path)
-        if self.num_of_path > 1:
-            self.edit_telegraph()
+            msg = f"😎 <b>Found <code>{all_contents_count}</code> results for <code>{fileName}</code></b>"
+            buttons = button_build.ButtonMaker()
+            buttons.buildbutton("🔎 VIEW", f"https://telegra.ph/{self.path[0]}")
 
-        msg = f"<b>Found <code>{all_contents_count}</code> results for <code>{fileName}</code></b>"
-        buttons = button_build.ButtonMaker()
-        buttons.buildbutton("🔎 VIEW", f"https://telegra.ph/{self.path[0]}")
-
-        return msg, InlineKeyboardMarkup(buttons.build_menu(1))
+            return msg, InlineKeyboardMarkup(buttons.build_menu(1))
 
 
     def count(self, link):
