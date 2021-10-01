@@ -3,7 +3,7 @@ import io
 import pickle
 import urllib.parse as urlparse
 from urllib.parse import parse_qs
-
+import telegraph
 import re
 import json
 import requests
@@ -25,7 +25,7 @@ from telegraph import Telegraph
 from bot import parent_id, DOWNLOAD_DIR, IS_TEAM_DRIVE, INDEX_URL, \
     USE_SERVICE_ACCOUNTS, telegraph_token, BUTTON_FOUR_NAME, BUTTON_FOUR_URL, BUTTON_FIVE_NAME, BUTTON_FIVE_URL, \
     BUTTON_SIX_NAME, BUTTON_SIX_URL, SHORTENER, SHORTENER_API, VIEW_LINK, DRIVES_NAMES, DRIVES_IDS, INDEX_URLS, \
-    RECURSIVE_SEARCH, telegraph
+    RECURSIVE_SEARCH
 from bot.helper.ext_utils.bot_utils import get_readable_file_size, setInterval
 from bot.helper.ext_utils.fs_utils import get_mime_type, get_path_size
 from bot.helper.ext_utils.shortenurl import short_url
