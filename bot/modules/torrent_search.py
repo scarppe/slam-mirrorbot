@@ -32,42 +32,37 @@ async def return_search(query, page=1, sukebei=False):
     query = query.lower().strip()
     used_search_info = search_info[sukebei]
     async with search_lock:
-        results, get_time = used_search_info.get(query, (None, 0))
-        if (time.time() - get_time) > 3600:
-            results = []
-            async with aiohttp.ClientSession() as session:
-                async with session.get(f'https://{"sukebei." if sukebei else ""}nyaa.si/?page=rss&q={urlencode(query)}') as resp:
-                    d = feedparser.parse(await resp.text())
-            text = ''
-            a = 0
-            parser = pyrogram_html.HTML(None)
-            for i in sorted(d['entries'], key=lambda i: int(i['nyaa_seeders']), reverse=True):
-                if i['nyaa_size'].startswith('0'):
-                    continue
-                if not int(i['nyaa_seeders']):
-                    break
-                link = i['link']
-                splitted = urlsplit(link)
-                if splitted.scheme == 'magnet' and splitted.query:
-                    link = f'<code>{link}</code>'
-                newtext = f'''🗂 <code>{html.escape(i["title"])}</code>
-🔗 <b>Link:</b> <code>{link}</code>
-📀 <b>Size:</b> <code>{i["nyaa_size"]}</code>
-🥑 <b>Seeders:</b> <code>{i["nyaa_seeders"]}</code>
-👪 <b>Leechers:</b> <code>{i["nyaa_leechers"]}</code>
-🎭 <b>Category:</b> <code>{i["nyaa_category"]}</code>\n\n'''
-                futtext = text + newtext
-                if (a and not a % 10) or len((await parser.parse(futtext))['message']) > 4096:
-                    results.append(text)
-                    futtext = newtext
-                text = futtext
-                a += 1
-            results.append(text)
-        ttl = time.time()
-        used_search_info[query] = results, ttl
         try:
+            results, get_time = used_search_info.get(query, (None, 0))
+            if (time.time() - get_time) > 3600:
+                results = []
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(f'https://{"sukebei." if sukebei else ""}nyaa.si/?page=rss&q={urlencode(query)}') as resp:
+                        d = feedparser.parse(await resp.text())
+                text = ''
+                a = 0
+                parser = pyrogram_html.HTML(None)
+                for i in sorted(d['entries'], key=lambda i: int(i['nyaa_seeders']), reverse=True):
+                    if i['nyaa_size'].startswith('0'):
+                        continue
+                    if not int(i['nyaa_seeders']):
+                        break
+                    link = i['link']
+                    splitted = urlsplit(link)
+                    if splitted.scheme == 'magnet' and splitted.query:
+                        link = f'<code>{link}</code>'
+                    newtext = f'''🗂 <code>{html.escape(i["title"])}</code>\n🔗 <b>Link:</b> <code>{link}</code>\n📀 <b>Size:</b> <code>{i["nyaa_size"]}</code>\n🥑 <b>Seeders:</b> <code>{i["nyaa_seeders"]}</code>\n👪 <b>Leechers:</b> <code>{i["nyaa_leechers"]}</code>\n🎭 <b>Category:</b> <code>{i["nyaa_category"]}</code>\n\n'''
+                    futtext = text + newtext
+                    if (a and not a % 10) or len((await parser.parse(futtext))['message']) > 4096:
+                        results.append(text)
+                        futtext = newtext
+                    text = futtext
+                    a += 1
+                results.append(text)
+            ttl = time.time()
+            used_search_info[query] = results, ttl
             return results[page], len(results), ttl
-        except IndexError:
+        except (IndexError, UnicodeDecodeError):
             return '', len(results), ttl
 
 message_info = {}
@@ -90,7 +85,7 @@ async def nyaa_search_sukebei(client, message):
 async def init_search(client, message, query, sukebei):
     result, pages, ttl = await return_search(query, sukebei=sukebei)
     if not result:
-        await message.reply_text('❗️ No results found.')
+        await message.reply_text('❗️ Unable to search. No results found. Please retry.')
     else:
         buttons = [
             InlineKeyboardButton(f'1/{pages}', 'nyaa_nop'),
@@ -220,17 +215,20 @@ class TorrentSearch:
             inline.append(nextBtn)
 
         res_lim = min(self.RESULT_LIMIT, len(self.response) - self.RESULT_LIMIT*self.index)
-        result = f"<b>Page - {self.index+1}</b>\n\n"
-        result += "\n\n=======================\n\n".join(
-            self.get_formatted_string(self.response[self.response_range[self.index]+i])
-            for i in range(res_lim)
-        )
+        try:
+            result = f"<b>Page - {self.index+1}</b>\n\n"
+            result += "\n\n=======================\n\n".join(
+                self.get_formatted_string(self.response[self.response_range[self.index]+i])
+                for i in range(res_lim)
+            )
 
-        await self.message.edit(
-            result,
-            reply_markup=InlineKeyboardMarkup([inline]),
-            parse_mode="HTML",
-        )
+            await self.message.edit(
+                result,
+                reply_markup=InlineKeyboardMarkup([inline]),
+                parse_mode="HTML",
+            )
+        except:
+            await self.message.edit("❗️ Unable to search. Please refine your query and retry.")
 
     async def find(self, client, message):
         if len(message.command) < 2:
@@ -249,10 +247,10 @@ class TorrentSearch:
                         result = list(itertools.chain(*result))
                     self.response = result
                     self.response_range = range(0, len(self.response), self.RESULT_LIMIT)
-            await self.update_message()
         except:
             await self.message.edit("❗️ Unable to search. Please refine your query and retry.")
             return
+        await self.update_message()
 
     async def delete(self, client, message):
         index = 0
