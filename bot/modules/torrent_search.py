@@ -63,6 +63,7 @@ async def return_search(query, page=1, sukebei=False):
             used_search_info[query] = results, ttl
             return results[page], len(results), ttl
         except (IndexError, UnicodeDecodeError):
+            ttl = time.time()
             return '', len(results), ttl
 
 message_info = {}
