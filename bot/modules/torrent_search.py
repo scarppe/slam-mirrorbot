@@ -50,12 +50,12 @@ async def return_search(query, page=1, sukebei=False):
                 splitted = urlsplit(link)
                 if splitted.scheme == 'magnet' and splitted.query:
                     link = f'<code>{link}</code>'
-                newtext = f'''<b>{a + 1}.</b> <code>{html.escape(i["title"])}</code>
-<b>Link:</b> <code>{link}</code>
-<b>Size:</b> <code>{i["nyaa_size"]}</code>
-<b>Seeders:</b> <code>{i["nyaa_seeders"]}</code>
-<b>Leechers:</b> <code>{i["nyaa_leechers"]}</code>
-<b>Category:</b> <code>{i["nyaa_category"]}</code>\n\n'''
+                newtext = f'''🗂 <code>{html.escape(i["title"])}</code>
+🔗 <b>Link:</b> <code>{link}</code>
+📀 <b>Size:</b> <code>{i["nyaa_size"]}</code>
+🥑 <b>Seeders:</b> <code>{i["nyaa_seeders"]}</code>
+👪 <b>Leechers:</b> <code>{i["nyaa_leechers"]}</code>
+🎭 <b>Category:</b> <code>{i["nyaa_category"]}</code>\n\n'''
                 futtext = text + newtext
                 if (a and not a % 10) or len((await parser.parse(futtext))['message']) > 4096:
                     results.append(text)
@@ -90,7 +90,7 @@ async def nyaa_search_sukebei(client, message):
 async def init_search(client, message, query, sukebei):
     result, pages, ttl = await return_search(query, sukebei=sukebei)
     if not result:
-        await message.reply_text('No results found')
+        await message.reply_text('❗️ No results found.')
     else:
         buttons = [
             InlineKeyboardButton(f'1/{pages}', 'nyaa_nop'),
@@ -220,7 +220,7 @@ class TorrentSearch:
             inline.append(nextBtn)
 
         res_lim = min(self.RESULT_LIMIT, len(self.response) - self.RESULT_LIMIT*self.index)
-        result = f"**Page - {self.index+1}**\n\n"
+        result = f"<b>Page - {self.index+1}</b>\n\n"
         result += "\n\n=======================\n\n".join(
             self.get_formatted_string(self.response[self.response_range[self.index]+i])
             for i in range(res_lim)
@@ -249,10 +249,10 @@ class TorrentSearch:
                         result = list(itertools.chain(*result))
                     self.response = result
                     self.response_range = range(0, len(self.response), self.RESULT_LIMIT)
+            await self.update_message()
         except:
-            await self.message.edit("❗️ No Results Found.")
+            await self.message.edit("❗️ Unable to search. Please refine your query and retry.")
             return
-        await self.update_message()
 
     async def delete(self, client, message):
         index = 0
@@ -288,7 +288,7 @@ RESULT_STR_TGX = (
 RESULT_STR_YTS = (
     "🗂 <b>Name:</b> <code>{Name}</code>\n"
     "🗓 <b>Released on:</b> <code>{ReleasedDate}</code>\n"
-    "🕺 <b>Genre:</b> <code>{Genre}</code>\n"
+    "🎭 <b>Genre:</b> <code>{Genre}</code>\n"
     "⭐️ <b>Rating:</b> <code>{Rating}</code>\n"
     "👍 <b>Likes:</b> <code>{Likes}</code>\n"
     "⏱ <b>Duration:</b> <code>{Runtime}</code>\n"
